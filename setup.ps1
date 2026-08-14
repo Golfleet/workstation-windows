@@ -84,17 +84,25 @@ Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name PrintScreenKeyForSni
 # =====================================================================
 Write-Host "Instalando e configurando o Zabbix Agent 2..." -ForegroundColor Cyan
 
-# Instala o software base limpo via Winget
-winget install -e --id Zabbix.ZabbixAgent2 --accept-package-agreements --accept-source-agreements --silent
+# 1. Força a criação da pasta para evitar erros de caminho
+New-Item -ItemType Directory -Force -Path "C:\Program Files\Zabbix Agent 2" | Out-Null
 
-# Baixa as configurações seguras com os novos caminhos do servidor
+# 2. Baixa o instalador MSI direto do link oficial validado
+$zabbixUrl = "https://cdn.zabbix.com/zabbix/binaries/stable/6.4/6.4.13/zabbix_agent2-6.4.13-windows-amd64-openssl.msi"
+$zabbixMsi = "$env:TEMP\zabbix_agent2.msi"
+Invoke-WebRequest -Uri $zabbixUrl -OutFile $zabbixMsi
+
+# 3. Instala o Zabbix silenciosamente 
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$zabbixMsi`" /qn" -Wait -NoNewWindow
+
+# 4. Baixa as configurações seguras com os novos caminhos do servidor da Golfleet
 $caminhoConf = "C:\Program Files\Zabbix Agent 2\zabbix_agent2.conf"
 Invoke-WebRequest -Uri "$RepoUrl/zabbix/win_zabbix_agent2.conf" -OutFile $caminhoConf -Credential $CredenciaisRepo
 
 $caminhoPsk = "C:\Program Files\Zabbix Agent 2\key.psk"
 Invoke-WebRequest -Uri "$RepoUrl/zabbix/key.psk" -OutFile $caminhoPsk -Credential $CredenciaisRepo
 
-# Reinicia para o Zabbix ler o novo arquivo de configuração e a chave
+# 5. Reinicia o serviço para o Zabbix ler o novo arquivo de configuração e a chave
 Restart-Service -Name "Zabbix Agent 2" -ErrorAction SilentlyContinue
 Write-Host "[OK] Zabbix configurado e arquivos protegidos importados." -ForegroundColor DarkGray
 
@@ -102,10 +110,10 @@ Write-Host "[OK] Zabbix configurado e arquivos protegidos importados." -Foregrou
 # 7. Instalação Segura: MeshCentral
 # =====================================================================
 Write-Host "Baixando e instalando o MeshCentral..." -ForegroundColor Cyan
-$meshInstaller = "$env:TEMP\meshagent64.exe"
+$meshInstaller = "$env:TEMP\meshagent64-Windows-Consent.exe"
 
 # Reutiliza as mesmas credenciais para baixar o Mesh
-Invoke-WebRequest -Uri "$RepoUrl/meshagent64.exe" -OutFile $meshInstaller -Credential $CredenciaisRepo
+Invoke-WebRequest -Uri "$RepoUrl/meshagent64-Windows-Consent.exe" -OutFile $meshInstaller -Credential $CredenciaisRepo
 Start-Process -FilePath $meshInstaller -ArgumentList "-fullinstall" -Wait -NoNewWindow
 Write-Host "[OK] MeshCentral instalado." -ForegroundColor DarkGray
 
