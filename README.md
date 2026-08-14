@@ -16,7 +16,7 @@ winget install --id Git.Git -e --silent
 
 ### 2. Clone este repositório
 ```powershell
-git clone [https://github.com/Golfleet/workstation-windows.git](https://github.com/Golfleet/workstation-windows.git)
+git clone https://github.com/Golfleet/workstation-windows.git
 ```
 
 ### 3. Libere a permissão de execução e rode o script
