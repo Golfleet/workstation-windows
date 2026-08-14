@@ -27,11 +27,11 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 ### 4. Siga as instruções na tela
 Durante a execução do script, o terminal fará pausas para que você preencha algumas informações obrigatórias:
 
--Novo Hostname da máquina.
+- Novo Hostname da máquina.
 
--Senha da conta local de Administrador (a digitação ficará oculta por segurança).
+- Senha da conta local de Administrador (a digitação ficará oculta por segurança).
 
--Usuário e Senha do repositório para download do MeshCentral.
+- Usuário e Senha do repositório para download do MeshCentral.
 
 ### 5. Reinicialização
 No final do processo, o script perguntará se você deseja reiniciar a máquina. Digite S para confirmar, garantindo que a troca do Hostname seja aplicada corretamente.
