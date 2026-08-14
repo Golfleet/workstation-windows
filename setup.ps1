@@ -97,11 +97,7 @@ foreach ($app in $apps) {
 Write-Host "Desativando Captura de Esboço no botão PrintScreen..." -ForegroundColor Cyan
 Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name PrintScreenKeyForSnippingEnabled -Value 0 2>$null
 
-# 7. Instalação de Repositórios Internos (Mesh e Zabbix)
-# =====================================================================
-Write-Host "Baixando e instalando agentes de monitoramento..." -ForegroundColor Cyan
-
-# MeshCentral
+# 7. Instalação do MeshCentral
 # =====================================================================
 Write-Host "Configurando o download do agente do MeshCentral..." -ForegroundColor Cyan
 
@@ -135,26 +131,36 @@ catch {
     Write-Warning "Detalhe do erro: $($_.Exception.Message)"
 }
 
-# Zabbix Agent 2
+# 8. Instalação do Zabbix 
 # =====================================================================
-Write-Host "Baixando o Zabbix Agent 2..." -ForegroundColor Cyan
-$zabbixUrl = "https://cdn.zabbix.com/zabbix/binaries/stable/6.4/6.4.13/zabbix_agent2-6.4.13-windows-amd64-openssl.msi"
+Write-Host "Configurando acesso ao servidor seguro de arquivos..." -ForegroundColor Cyan
+
+# Solicita credenciais do repositório de arquivos de forma segura
+$RepoUser = Read-Host "Digite o usuário do servidor de arquivos"
+$RepoPass = Read-Host "Digite a senha do servidor de arquivos" -AsSecureString
+$Cred = New-Object System.Management.Automation.PSCredential ($RepoUser, $RepoPass)
+
+$repoUrl = "https://seu-servidor-de-arquivos.com.br"
 $zabbixInstaller = "$env:TEMP\zabbix_agent2.msi"
-$zabbixLog = "$env:TEMP\zabbix_install_log.txt"
 
-Invoke-WebRequest -Uri $zabbixUrl -OutFile $zabbixInstaller
+# 1. Baixa e Instala o Zabbix "em branco"
+Invoke-WebRequest -Uri "$repoUrl/zabbix_agent2.msi" -OutFile $zabbixInstaller -Credential $Cred
+Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$zabbixInstaller`" /qn" -Wait -NoNewWindow
 
-Write-Host "Instalando o Zabbix Agent 2..." -ForegroundColor Cyan
-# Monta os argumentos de instalação com as aspas devidamente escapadas
-$zabbixArgs = "/l*v `"$zabbixLog`" /i `"$zabbixInstaller`" /qn SERVER=127.0.0.1 SERVERACTIVE=zbxdesk.golfleet.com.br HOSTMETADATA=`"Windows  7D264EE34F5FD578CB699E3E29A3D288742D832FAAF593B692C5DED3EBEE3348`" TLSCONNECT=psk TLSACCEPT=psk TLSPSKIDENTITY=desktops TLSPSKVALUE=ea5281a5bcfa71250508b2c79085e63b1600c8ed17dce3f4c777ddd7398954ae"
+# 2. Baixa o zabbix_agent2.conf do servidor seguro para a pasta do Zabbix no Windows
+$caminhoConf = "C:\Program Files\Zabbix Agent 2\zabbix_agent2.conf"
+Invoke-WebRequest -Uri "$repoUrl/zabbix/zabbix_agent2.conf" -OutFile $caminhoConf -Credential $Cred
 
-# Executa o instalador de forma silenciosa e aguarda a conclusão
-Start-Process -FilePath "msiexec.exe" -ArgumentList $zabbixArgs -Wait -NoNewWindow
+# 3. Baixa o key.psk (se você utilizar criptografia)
+$caminhoPsk = "C:\Program Files\Zabbix Agent 2\key.psk"
+Invoke-WebRequest -Uri "$repoUrl/zabbix/key.psk" -OutFile $caminhoPsk -Credential $Cred
 
-Write-Host "===================================================" -ForegroundColor Cyan
-Write-Host "PREPARAÇÃO CONCLUÍDA!" -ForegroundColor Green
+# 4. Reinicia o serviço para o Zabbix ler o novo arquivo .conf
+Restart-Service -Name "Zabbix Agent 2" -ErrorAction SilentlyContinue
 
-# 8. Pergunta sobre a reinicialização
+Write-Host "Zabbix configurado e arquivos protegidos importados." -ForegroundColor Green
+
+# 9. Pergunta sobre a reinicialização
 # =====================================================================
 Write-Host ""
 $resposta = Read-Host "Deseja reiniciar o computador agora para aplicar todas as configurações, como o novo hostname? (S/N)"
