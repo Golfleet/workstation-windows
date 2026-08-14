@@ -87,12 +87,12 @@ Write-Host "Instalando e configurando o Zabbix Agent 2..." -ForegroundColor Cyan
 # Instala o software base limpo via Winget
 winget install -e --id Zabbix.ZabbixAgent2 --accept-package-agreements --accept-source-agreements --silent
 
-# Baixa as configurações seguras diretamente das URLs solicitadas
+# Baixa as configurações seguras com os novos caminhos do servidor
 $caminhoConf = "C:\Program Files\Zabbix Agent 2\zabbix_agent2.conf"
-Invoke-WebRequest -Uri "$RepoUrl/zabbix_agent.conf" -OutFile $caminhoConf -Credential $CredenciaisRepo
+Invoke-WebRequest -Uri "$RepoUrl/zabbix/win_zabbix_agent2.conf" -OutFile $caminhoConf -Credential $CredenciaisRepo
 
-$caminhoPsk = "C:\Program Files\Zabbix Agent 2\zabbix_agent_key.psk"
-Invoke-WebRequest -Uri "$RepoUrl/zabbix_agent_key.psk" -OutFile $caminhoPsk -Credential $CredenciaisRepo
+$caminhoPsk = "C:\Program Files\Zabbix Agent 2\key.psk"
+Invoke-WebRequest -Uri "$RepoUrl/zabbix/key.psk" -OutFile $caminhoPsk -Credential $CredenciaisRepo
 
 # Reinicia para o Zabbix ler o novo arquivo de configuração e a chave
 Restart-Service -Name "Zabbix Agent 2" -ErrorAction SilentlyContinue
