@@ -118,4 +118,4 @@ Start-Process -FilePath $meshInstaller -ArgumentList "-fullinstall" -Wait -NoNew
 Write-Host "[OK] MeshCentral instalado." -ForegroundColor DarkGray
 
 Write-Host "===================================================" -ForegroundColor Cyan
-Write-Host "PREPARAÇÃO CONCLUÍDA COM SUCESSO! Reinicie a máquina." -ForegroundColor Green
+Write-Host "PREPARACAO CONCLUIDA COM SUCESSO! Reinicie a maquina." -ForegroundColor Green
