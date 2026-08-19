@@ -10,7 +10,7 @@ Este script altera o hostname, configura bloqueio de tela, instala aplicativos b
 
 ### 1. Instale o Git (caso a máquina seja nova e não tenha)
 ```powershell
-winget install --id Git.Git -e --silent
+winget install --id Git.Git -e --silent --source winget
 ```
 *(Nota: Se o Git acabou de ser instalado, feche a janela do PowerShell e abra uma nova como Administrador para o sistema reconhecer o comando).*
 
