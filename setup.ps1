@@ -84,6 +84,9 @@ $atalho.Save()
 # Desativar print padrao do Windows (liberar para Flameshot)
 Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name PrintScreenKeyForSnippingEnabled -Value 0 2>$null
 
+# Configurar o Flameshot para iniciar com o Windows (Para Todos os Usuarios)
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "Flameshot" -Value "`"C:\Program Files\Flameshot\bin\flameshot.exe`"" -ErrorAction SilentlyContinue
+
 # =====================================================================
 # 6. Instalacao Segura: Zabbix Agent 2
 # =====================================================================
@@ -123,7 +126,7 @@ Start-Process -FilePath $meshInstaller -ArgumentList "-fullinstall" -Wait -NoNew
 Write-Host "[OK] MeshCentral instalado." -ForegroundColor DarkGray
 
 # =====================================================================
-# 8. Limpeza (Exclui a pasta do GitHub do disco C:)
+# 8. Limpeza e Finalizacao
 # =====================================================================
 Write-Host "Limpando arquivos temporarios e removendo a pasta de instalacao..." -ForegroundColor Cyan
 
@@ -138,4 +141,13 @@ if (Test-Path $PastaInstalacao) {
 }
 
 Write-Host "===================================================" -ForegroundColor Cyan
-Write-Host "PREPARACAO CONCLUIDA COM SUCESSO! Reinicie a maquina." -ForegroundColor Green
+Write-Host "PREPARACAO CONCLUIDA COM SUCESSO!" -ForegroundColor Green
+
+# Pergunta sobre a reinicializacao
+$reiniciar = Read-Host "`nDeseja reiniciar o computador agora? (S/N)"
+if ($reiniciar -match "^[sS]") {
+    Write-Host "Reiniciando o sistema em alguns segundos..." -ForegroundColor Yellow
+    Restart-Computer -Force
+} else {
+    Write-Host "Processo finalizado. Lembre-se de reiniciar a maquina posteriormente para aplicar o novo Hostname." -ForegroundColor Yellow
+}
