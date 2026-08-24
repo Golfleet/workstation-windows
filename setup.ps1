@@ -29,8 +29,12 @@ Write-Host "`nIniciando a automacao... Pode ir tomar um cafe!" -ForegroundColor 
 # 3. Configuracoes do Sistema Operacional
 # =====================================================================
 if (-not [string]::IsNullOrWhiteSpace($novoNome)) {
-    Rename-Computer -NewName $novoNome -PassThru | Out-Null
-    Write-Host "[OK] Hostname alterado para: $novoNome" -ForegroundColor DarkGray
+    if ($novoNome -ne $env:COMPUTERNAME) {
+        Rename-Computer -NewName $novoNome -PassThru | Out-Null
+        Write-Host "[OK] Hostname alterado para: $novoNome" -ForegroundColor DarkGray
+    } else {
+        Write-Host "[OK] O Hostname ja e '$novoNome'. Nenhuma mudanca necessaria." -ForegroundColor DarkGray
+    }
 }
 
 Write-Host "Configurando Wallpaper e Energia..." -ForegroundColor Cyan
@@ -63,8 +67,19 @@ if ($ContaAdmin) {
 Write-Host "Instalando aplicativos basicos..." -ForegroundColor Cyan
 $apps = @("Google.Chrome", "Flameshot.Flameshot", "Discord.Discord", "Adobe.Acrobat.Reader.64-bit")
 foreach ($app in $apps) {
-    winget install -e --id $app --accept-package-agreements --accept-source-agreements --silent
+    Write-Host "-> Instalando $app..." -ForegroundColor DarkGray
+    winget install -e --id $app --accept-package-agreements --accept-source-agreements --silent --source winget
 }
+
+# Criar atalho PWA para o 3CX
+$url3CX = "https://golfleet.my3cx.com.br/#/login"
+$WshShell = New-Object -comObject WScript.Shell
+$caminhoAtalho = "$env:Public\Desktop\3CX.lnk"
+$atalho = $WshShell.CreateShortcut($caminhoAtalho)
+$atalho.TargetPath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+$atalho.Arguments = "--app=$url3CX"
+$atalho.IconLocation = "C:\Program Files\Google\Chrome\Application\chrome.exe, 0"
+$atalho.Save()
 
 # Desativar print padrao do Windows (liberar para Flameshot)
 Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name PrintScreenKeyForSnippingEnabled -Value 0 2>$null
@@ -106,6 +121,21 @@ $meshInstaller = "$env:TEMP\meshagent64-Windows-Consent.exe"
 Invoke-WebRequest -Uri "$RepoUrl/meshagent64-Windows-Consent.exe" -OutFile $meshInstaller -Credential $CredenciaisRepo
 Start-Process -FilePath $meshInstaller -ArgumentList "-fullinstall" -Wait -NoNewWindow
 Write-Host "[OK] MeshCentral instalado." -ForegroundColor DarkGray
+
+# =====================================================================
+# 8. Limpeza (Exclui a pasta do GitHub do disco C:)
+# =====================================================================
+Write-Host "Limpando arquivos temporarios e removendo a pasta de instalacao..." -ForegroundColor Cyan
+
+# Muda o local do prompt para o C:\ para garantir que a pasta nao fique "em uso"
+Set-Location -Path "C:\" 
+Start-Sleep -Seconds 2 # Aguarda 2 segundos para o sistema liberar o bloqueio dos arquivos
+
+$PastaInstalacao = "C:\workstation-windows"
+if (Test-Path $PastaInstalacao) {
+    Remove-Item -Path $PastaInstalacao -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "[OK] Pasta $PastaInstalacao excluida com sucesso." -ForegroundColor DarkGray
+}
 
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host "PREPARACAO CONCLUIDA COM SUCESSO! Reinicie a maquina." -ForegroundColor Green
