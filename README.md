@@ -16,13 +16,13 @@ winget install --id Git.Git -e --silent --source winget
 
 ### 2. Clone este repositório
 ```powershell
-git clone https://github.com/Golfleet/workstation-windows.git
+git clone https://github.com/Golfleet/workstation-windows.git C:\workstation-windows
 ```
 
 ### 3. Libere a permissão de execução e rode o script
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force
-.\workstation-windows\setup.ps1
+C:\workstation-windows\setup.ps1
 ```
 ### 4. Siga as instruções na tela
 Durante a execução do script, o terminal fará pausas para que você preencha algumas informações obrigatórias:
