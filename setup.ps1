@@ -71,16 +71,6 @@ foreach ($app in $apps) {
     winget install -e --id $app --accept-package-agreements --accept-source-agreements --silent --source winget
 }
 
-# Criar atalho PWA para o 3CX
-$url3CX = "https://golfleet.my3cx.com.br/#/login"
-$WshShell = New-Object -comObject WScript.Shell
-$caminhoAtalho = "$env:Public\Desktop\3CX.lnk"
-$atalho = $WshShell.CreateShortcut($caminhoAtalho)
-$atalho.TargetPath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-$atalho.Arguments = "--app=$url3CX"
-$atalho.IconLocation = "C:\Program Files\Google\Chrome\Application\chrome.exe, 0"
-$atalho.Save()
-
 # Desativar print padrao do Windows (liberar para Flameshot)
 Set-ItemProperty -Path "HKCU:\Control Panel\Keyboard" -Name PrintScreenKeyForSnippingEnabled -Value 0 2>$null
 
